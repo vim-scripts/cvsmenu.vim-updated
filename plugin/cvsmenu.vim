@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Contributor : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.94 $
-" $Date: 2005/03/11 05:24:02 $
+" $Revision: 1.96 $
+" $Date: 2005/03/28 15:52:20 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -85,12 +85,10 @@ endif
 
 
 " script variables	{{{1
-if has('unix')				" path separator & escape pattern
+if has('unix')				" path separator
   let s:sep='/'
-  let s:esc_pat='"\\'
 else
   let s:sep='\'
-  let s:esc_pat='"'
 endif
 let s:CVSentries='CVS'.s:sep.'Entries'	" location of 'CVS/Entries' file
 let s:cvsmenuhttp="http://cvs.sf.net/cgi-bin/viewcvs.cgi/~checkout~/ezytools/VimTools/"
@@ -108,130 +106,131 @@ endif
 "-----------------------------------------------------------------------------
 " Menu entries		{{{1
 "-----------------------------------------------------------------------------
-" Space before each command to inhibit translation (no one wants a 'cvs Differenz':)
+" Spaces after items to inhibit translation (no one wants a 'cvs Differenz':)
+" as well as to prevent the hot keys from being altered
 " <esc> in Keyword menus to avoid expansion
 " use only TAB between menu item and command (used for MakeLeaderMapping)
 
-amenu &CVS.\ In&fo						:call CVSShowInfo()<cr>
-amenu &CVS.\ Settin&gs.\ In&fo\ (buffer)			:call CVSShowInfo(1)<cr>
-amenu &CVS.\ Settin&gs.\ Show\ &mappings	                :call CVSShowMapping()<cr>
-amenu &CVS.\ Settin&gs.-SEP1-					:
-amenu &CVS.\ Settin&gs.\ &Autocheck.&Enable			:call CVSSetAutocheck(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Autocheck.&Disable			:call CVSSetAutocheck(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Target.File\ in\ &buffer		:call CVSSetForceDir(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Target.&Directory			:call CVSSetForceDir(2)<cr>
-amenu &CVS.\ Settin&gs.\ &Diff.Stay\ in\ &original		:call CVSSetDontSwitch(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Diff.Switch\ to\ &diffed		:call CVSSetDontSwitch(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Diff.-SEP1-				:
-amenu &CVS.\ Settin&gs.\ &Diff.&Autorestore\ prev\.\ mode	:call CVSSetSaveDiff(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Diff.&No\ autorestore			:call CVSSetSaveDiff(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Diff.-SEP2-				:
-amenu &CVS.\ Settin&gs.\ &Diff.Re&store\ pre-diff\ mode		:call CVSRestoreDiffMode()<cr>
-amenu &CVS.\ Settin&gs.\ Revision\ &queries.&Enable		:call CVSSetQueryRevision(1)<cr>
-amenu &CVS.\ Settin&gs.\ Revision\ &queries.&Disable		:call CVSSetQueryRevision(0)<cr>
-amenu &CVS.\ Settin&gs.\ Revision\ &queries.-SEP1-		:
-amenu &CVS.\ Settin&gs.\ Revision\ &queries.&Offer\ current\ rev	:call CVSSetOfferRevision(1)<cr>
-amenu &CVS.\ Settin&gs.\ Revision\ &queries.&Hide\ current\ rev		:call CVSSetOfferRevision(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.N&otifcation.Enable\ &statusline	:call CVSSetStatusline(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.N&otifcation.Disable\ status&line	:call CVSSetStatusline(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.N&otifcation.-SEP1-			:
-amenu &CVS.\ Settin&gs.\ &Output.N&otifcation.Enable\ &titlebar		:call CVSSetTitlebar(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.N&otifcation.Disable\ title&bar	:call CVSSetTitlebar(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.-SEP1-					:
-amenu &CVS.\ Settin&gs.\ &Output.To\ new\ &buffer		:call CVSSetDumpAndClose(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.&Notify\ only			:call CVSSetDumpAndClose(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.&Autoswitch			:call CVSSetDumpAndClose(2)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.-SEP2-				:
-amenu &CVS.\ Settin&gs.\ &Output.&Compressed			:call CVSSetCompressOutput(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.&Full				:call CVSSetCompressOutput(0)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.-SEP3-				:
-amenu &CVS.\ Settin&gs.\ &Output.&Sorted			:call CVSSetSortOutput(1)<cr>
-amenu &CVS.\ Settin&gs.\ &Output.&Unsorted			:call CVSSetSortOutput(0)<cr>
-amenu &CVS.\ Settin&gs.-SEP2-					:
-amenu &CVS.\ Settin&gs.\ &Install.&Install\ updates		:call CVSInstallUpdates()<cr>
-amenu &CVS.\ Settin&gs.\ &Install.&Download\ updates		:call CVSDownloadUpdates()<cr>
-amenu &CVS.\ Settin&gs.\ &Install.Install\ buffer\ as\ &help	:call CVSInstallAsHelp()<cr>
-amenu &CVS.\ Settin&gs.\ &Install.Install\ buffer\ as\ &plugin	:call CVSInstallAsPlugin()<cr>
-amenu &CVS.\ &Keyword.\ &Author					a$Author<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ &Date					a$Date<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ &Header					a$Header<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ &Id					a$Id<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ &Name					a$Name<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ Loc&ker					a$Locker<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ &Log					a$Log<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ RCS&file				a$RCSfile<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ &Revision				a$Revision<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ &Source					a$Source<esc>a$<esc>
-amenu &CVS.\ &Keyword.\ S&tate					a$State<esc>a$<esc>
-amenu &CVS.\ Director&y.\ &Log					:call CVSSetForceDir(1)<cr>:call CVSlog()<cr>
-amenu &CVS.\ Director&y.\ &Status				:call CVSSetForceDir(1)<cr>:call CVSstatus()<cr>
-amenu &CVS.\ Director&y.\ S&hort\ status			:call CVSSetForceDir(1)<cr>:call CVSshortstatus()<cr>
-amenu &CVS.\ Director&y.\ Lo&cal\ status			:call CVSSetForceDir(1)<cr>:call CVSLocalStatus()<cr>
-amenu &CVS.\ Director&y.-SEP1-					:
-amenu &CVS.\ Director&y.\ &Query\ update			:call CVSSetForceDir(1)<cr>:call CVSqueryupdate()<cr>
-amenu &CVS.\ Director&y.\ &Update				:call CVSSetForceDir(1)<cr>:call CVSupdate()<cr>
-amenu &CVS.\ Director&y.-SEP2-					:
-amenu &CVS.\ Director&y.\ &Add					:call CVSSetForceDir(1)<cr>:call CVSadd()<cr>
-amenu &CVS.\ Director&y.\ Comm&it				:call CVSSetForceDir(1)<cr>:call CVScommit()<cr>
-amenu &CVS.\ Director&y.-SEP3-					:
-amenu &CVS.\ Director&y.\ Re&move\ from\ repositoy			:call CVSSetForceDir(1)<cr>:call CVSremove()<cr>
-amenu &CVS.\ E&xtra.\ &Create\ patchfile.\ &Context		:call CVSdiffcontext()<cr>
-amenu &CVS.\ E&xtra.\ &Create\ patchfile.\ &Standard		:call CVSdiffstandard()<cr>
-amenu &CVS.\ E&xtra.\ &Create\ patchfile.\ &Uni			:call CVSdiffuni()<cr>
-amenu &CVS.\ E&xtra.\ &Diff\ to\ revision			:call CVSdifftorev()<cr>
-amenu &CVS.\ E&xtra.\ &Log\ to\ revision			:call CVSlogtorev()<cr>
-amenu &CVS.\ E&xtra.-SEP1-					:
-amenu &CVS.\ E&xtra.\ Check&out\ revision			:call CVScheckoutrevision()<cr>
-amenu &CVS.\ E&xtra.\ &Update\ to\ revision			:call CVSupdatetorev()<cr>
-amenu &CVS.\ E&xtra.\ &Merge\ in\ revision			:call CVSupdatemergerev()<cr>
-amenu &CVS.\ E&xtra.\ Merge\ in\ revision\ di&ffs		:call CVSupdatemergediff()<cr>
-amenu &CVS.\ E&xtra.-SEP2-					:
-amenu &CVS.\ E&xtra.\ Comm&it\ to\ revision			:call CVScommitrevision()<cr>
-amenu &CVS.\ E&xtra.\ Im&port\ to\ revision			:call CVSimportrevision()<cr>
-amenu &CVS.\ E&xtra.\ &Join\ in\ to\ revision			:call CVSjoininrevision()<cr>
-amenu &CVS.\ E&xtra.-SEP3-					:
-amenu &CVS.\ E&xtra.\ CVS\ lin&ks				:call CVSOpenLinks()<cr>
-amenu &CVS.\ E&xtra.\ &Get\ file				:call CVSGet()<cr>
-amenu &CVS.\ E&xtra.\ Get\ file\ (pass&word)			:call CVSGet('','','io')<cr>
+amenu &CVS.In&fo\ 						:call CVSShowInfo()<cr>
+amenu &CVS.Settin&gs\ .In&fo\ (buffer)\ 			:call CVSShowInfo(1)<cr>
+amenu &CVS.Settin&gs\ .Show\ &mappings\ 			:call CVSShowMapping()<cr>
+amenu &CVS.Settin&gs\ .-SEP1-					:
+amenu &CVS.Settin&gs\ .&Autocheck\ .&Enable\ 			:call CVSSetAutocheck(1)<cr>
+amenu &CVS.Settin&gs\ .&Autocheck\ .&Disable\ 			:call CVSSetAutocheck(0)<cr>
+amenu &CVS.Settin&gs\ .&Target\ .File\ in\ &buffer\ 		:call CVSSetForceDir(0)<cr>
+amenu &CVS.Settin&gs\ .&Target\ .&Directory\ 			:call CVSSetForceDir(2)<cr>
+amenu &CVS.Settin&gs\ .&Diff\ .Stay\ in\ &original\ 		:call CVSSetDontSwitch(1)<cr>
+amenu &CVS.Settin&gs\ .&Diff\ .Switch\ to\ &diffed\ 		:call CVSSetDontSwitch(0)<cr>
+amenu &CVS.Settin&gs\ .&Diff\ .-SEP1-				:
+amenu &CVS.Settin&gs\ .&Diff\ .&Autorestore\ prev\.mode\ 	:call CVSSetSaveDiff(1)<cr>
+amenu &CVS.Settin&gs\ .&Diff\ .&No\ autorestore\ 		:call CVSSetSaveDiff(0)<cr>
+amenu &CVS.Settin&gs\ .&Diff\ .-SEP2-				:
+amenu &CVS.Settin&gs\ .&Diff\ .Re&store\ pre-diff\ mode\ 	:call CVSRestoreDiffMode()<cr>
+amenu &CVS.Settin&gs\ .Revision\ &queries\ .&Enable\ 		:call CVSSetQueryRevision(1)<cr>
+amenu &CVS.Settin&gs\ .Revision\ &queries\ .&Disable\ 		:call CVSSetQueryRevision(0)<cr>
+amenu &CVS.Settin&gs\ .Revision\ &queries\ .-SEP1-		:
+amenu &CVS.Settin&gs\ .Revision\ &queries\ .&Offer\ current\ rev\ 	:call CVSSetOfferRevision(1)<cr>
+amenu &CVS.Settin&gs\ .Revision\ &queries\ .&Hide\ current\ rev\ 	:call CVSSetOfferRevision(0)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .N&otifcation.Enable\ &statusline\ 	:call CVSSetStatusline(1)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .N&otifcation.Disable\ status&line\ 	:call CVSSetStatusline(0)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .N&otifcation.-SEP1-			:
+amenu &CVS.Settin&gs\ .&Output\ .N&otifcation.Enable\ &titlebar\ 	:call CVSSetTitlebar(1)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .N&otifcation.Disable\ title&bar\ 	:call CVSSetTitlebar(0)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .-SEP1-				:
+amenu &CVS.Settin&gs\ .&Output\ .To\ new\ &buffer\ 		:call CVSSetDumpAndClose(0)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .&Notify\ only\ 		:call CVSSetDumpAndClose(1)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .&Autoswitch\ 			:call CVSSetDumpAndClose(2)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .-SEP2-				:
+amenu &CVS.Settin&gs\ .&Output\ .&Compressed\ 			:call CVSSetCompressOutput(1)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .&Full\ 			:call CVSSetCompressOutput(0)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .-SEP3-				:
+amenu &CVS.Settin&gs\ .&Output\ .&Sorted\ 			:call CVSSetSortOutput(1)<cr>
+amenu &CVS.Settin&gs\ .&Output\ .&Unsorted\ 			:call CVSSetSortOutput(0)<cr>
+amenu &CVS.Settin&gs\ .-SEP2-					:
+amenu &CVS.Settin&gs\ .&Install\ .&Install\ updates\ 		:call CVSInstallUpdates()<cr>
+amenu &CVS.Settin&gs\ .&Install\ .&Download\ updates\ 		:call CVSDownloadUpdates()<cr>
+amenu &CVS.Settin&gs\ .&Install\ .Install\ buffer\ as\ &help\ 	:call CVSInstallAsHelp()<cr>
+amenu &CVS.Settin&gs\ .&Install\ .Install\ buffer\ as\ &plugin\ 	:call CVSInstallAsPlugin()<cr>
+amenu &CVS.&Keyword\ .&Author\ 					a$Author<esc>a$<esc>
+amenu &CVS.&Keyword\ .&Date\ 					a$Date<esc>a$<esc>
+amenu &CVS.&Keyword\ .&Header\ 					a$Header<esc>a$<esc>
+amenu &CVS.&Keyword\ .&Id\ 					a$Id<esc>a$<esc>
+amenu &CVS.&Keyword\ .&Name\ 					a$Name<esc>a$<esc>
+amenu &CVS.&Keyword\ .Loc&ker\ 					a$Locker<esc>a$<esc>
+amenu &CVS.&Keyword\ .&Log\ 					a$Log<esc>a$<esc>
+amenu &CVS.&Keyword\ .RCS&file\ 				a$RCSfile<esc>a$<esc>
+amenu &CVS.&Keyword\ .&Revision\ 				a$Revision<esc>a$<esc>
+amenu &CVS.&Keyword\ .&Source\ 					a$Source<esc>a$<esc>
+amenu &CVS.&Keyword\ .S&tate\ 					a$State<esc>a$<esc>
+amenu &CVS.Director&y\ .&Log\ 					:call CVSSetForceDir(1)<cr>:call CVSlog()<cr>
+amenu &CVS.Director&y\ .&Status\ 				:call CVSSetForceDir(1)<cr>:call CVSstatus()<cr>
+amenu &CVS.Director&y\ .S&hort\ status\ 			:call CVSSetForceDir(1)<cr>:call CVSshortstatus()<cr>
+amenu &CVS.Director&y\ .Lo&cal\ status\ 			:call CVSSetForceDir(1)<cr>:call CVSLocalStatus()<cr>
+amenu &CVS.Director&y\ .-SEP1-					:
+amenu &CVS.Director&y\ .&Query\ update\ 			:call CVSSetForceDir(1)<cr>:call CVSqueryupdate()<cr>
+amenu &CVS.Director&y\ .&Update\ 				:call CVSSetForceDir(1)<cr>:call CVSupdate()<cr>
+amenu &CVS.Director&y\ .-SEP2-					:
+amenu &CVS.Director&y\ .&Add\ 					:call CVSSetForceDir(1)<cr>:call CVSadd()<cr>
+amenu &CVS.Director&y\ .Comm&it\ 				:call CVSSetForceDir(1)<cr>:call CVScommit()<cr>
+amenu &CVS.Director&y\ .-SEP3-					:
+amenu &CVS.Director&y\ .Re&move\ from\ repositoy\ 		:call CVSSetForceDir(1)<cr>:call CVSremove()<cr>
+amenu &CVS.E&xtra\ .&Create\ patchfile\ .&Context\ 		:call CVSdiffcontext()<cr>
+amenu &CVS.E&xtra\ .&Create\ patchfile\ .&Standard\ 		:call CVSdiffstandard()<cr>
+amenu &CVS.E&xtra\ .&Create\ patchfile\ .&Uni\ 			:call CVSdiffuni()<cr>
+amenu &CVS.E&xtra\ .&Diff\ to\ revision\ 			:call CVSdifftorev()<cr>
+amenu &CVS.E&xtra\ .&Log\ to\ revision\ 			:call CVSlogtorev()<cr>
+amenu &CVS.E&xtra\ .-SEP1-					:
+amenu &CVS.E&xtra\ .Check&out\ revision\ 			:call CVScheckoutrevision()<cr>
+amenu &CVS.E&xtra\ .&Update\ to\ revision\ 			:call CVSupdatetorev()<cr>
+amenu &CVS.E&xtra\ .&Merge\ in\ revision\ 			:call CVSupdatemergerev()<cr>
+amenu &CVS.E&xtra\ .Merge\ in\ revision\ di&ffs\ 		:call CVSupdatemergediff()<cr>
+amenu &CVS.E&xtra\ .-SEP2-					:
+amenu &CVS.E&xtra\ .Comm&it\ to\ revision\ 			:call CVScommitrevision()<cr>
+amenu &CVS.E&xtra\ .Im&port\ to\ revision\ 			:call CVSimportrevision()<cr>
+amenu &CVS.E&xtra\ .&Join\ in\ to\ revision\ 			:call CVSjoininrevision()<cr>
+amenu &CVS.E&xtra\ .-SEP3-					:
+amenu &CVS.E&xtra\ .CVS\ lin&ks\ 				:call CVSOpenLinks()<cr>
+amenu &CVS.E&xtra\ .&Get\ file\ 				:call CVSGet()<cr>
+amenu &CVS.E&xtra\ .Get\ file\ (pass&word)\ 			:call CVSGet('','','io')<cr>
 amenu &CVS.-SEP1-						:
-amenu &CVS.\ Ad&min.\ Log&in					:call CVSlogin()<cr>
-amenu &CVS.\ Ad&min.\ Log&out					:call CVSlogout()<cr>
-amenu &CVS.\ D&elete.\ Re&move\ from\ repository		:call CVSremove()<cr>
-amenu &CVS.\ D&elete.\ Re&lease\ workdir			:call CVSrelease()<cr>
-amenu &CVS.\ &Tag.\ &Create\ tag				:call CVStag()<cr>
-amenu &CVS.\ &Tag.\ &Remove\ tag				:call CVStagremove()<cr>
-amenu &CVS.\ &Tag.\ Create\ &branch				:call CVSbranch()<cr>
-amenu &CVS.\ &Tag.-SEP1-					:
-amenu &CVS.\ &Tag.\ Cre&ate\ tag\ by\ module			:call CVSrtag()<cr>
-amenu &CVS.\ &Tag.\ Rem&ove\ tag\ by\ module			:call CVSrtagremove()<cr>
-amenu &CVS.\ &Tag.\ Create\ branc&h\ by\ module			:call CVSrbranch()<cr>
-amenu &CVS.\ &Watch/Edit.\ &Watchers				:call CVSwatchwatchers()<cr>
-amenu &CVS.\ &Watch/Edit.\ Watch\ &add				:call CVSwatchadd()<cr>
-amenu &CVS.\ &Watch/Edit.\ Watch\ &remove			:call CVSwatchremove()<cr>
-amenu &CVS.\ &Watch/Edit.\ Watch\ o&n				:call CVSwatchon()<cr>
-amenu &CVS.\ &Watch/Edit.\ Watch\ o&ff				:call CVSwatchoff()<cr>
-amenu &CVS.\ &Watch/Edit.-SEP1-					:
-amenu &CVS.\ &Watch/Edit.\ &Editors				:call CVSwatcheditors()<cr>
-amenu &CVS.\ &Watch/Edit.\ Edi&t				:call CVSwatchedit()<cr>
-amenu &CVS.\ &Watch/Edit.\ &Unedit				:call CVSwatchunedit()<cr>
+amenu &CVS.Ad&min\ .Log&in\ 					:call CVSlogin()<cr>
+amenu &CVS.Ad&min\ .Log&out\ 					:call CVSlogout()<cr>
+amenu &CVS.D&elete\ .Re&move\ from\ repository\ 		:call CVSremove()<cr>
+amenu &CVS.D&elete\ .Re&lease\ workdir\ 			:call CVSrelease()<cr>
+amenu &CVS.&Tag\ .&Create\ tag\ 				:call CVStag()<cr>
+amenu &CVS.&Tag\ .&Remove\ tag\ 				:call CVStagremove()<cr>
+amenu &CVS.&Tag\ .Create\ &branch\ 				:call CVSbranch()<cr>
+amenu &CVS.&Tag\ .-SEP1-					:
+amenu &CVS.&Tag\ .Cre&ate\ tag\ by\ module\ 			:call CVSrtag()<cr>
+amenu &CVS.&Tag\ .Rem&ove\ tag\ by\ module\ 			:call CVSrtagremove()<cr>
+amenu &CVS.&Tag\ .Create\ branc&h\ by\ module\ 			:call CVSrbranch()<cr>
+amenu &CVS.&Watch/Edit\ .&Watchers\ 				:call CVSwatchwatchers()<cr>
+amenu &CVS.&Watch/Edit\ .Watch\ &add\ 				:call CVSwatchadd()<cr>
+amenu &CVS.&Watch/Edit\ .Watch\ &remove\ 			:call CVSwatchremove()<cr>
+amenu &CVS.&Watch/Edit\ .Watch\ o&n\ 				:call CVSwatchon()<cr>
+amenu &CVS.&Watch/Edit\ .Watch\ o&ff\ 				:call CVSwatchoff()<cr>
+amenu &CVS.&Watch/Edit\ .-SEP1-					:
+amenu &CVS.&Watch/Edit\ .&Editors\ 				:call CVSwatcheditors()<cr>
+amenu &CVS.&Watch/Edit\ .Edi&t\ 				:call CVSwatchedit()<cr>
+amenu &CVS.&Watch/Edit\ .&Unedit\ 				:call CVSwatchunedit()<cr>
 amenu &CVS.-SEP2-						:
-amenu &CVS.\ &Diff						:call CVSdiff()<cr>
-amenu &CVS.\ A&nnotate						:call CVSannotate()<cr>
-amenu &CVS.\ Histo&ry						:call CVShistory()<cr>
-amenu &CVS.\ &Log						:call CVSlog()<cr>
-amenu &CVS.\ &Status						:call CVSstatus()<cr>
-amenu &CVS.\ S&hort\ status					:call CVSshortstatus()<cr>
-amenu &CVS.\ Lo&cal\ status					:call CVSLocalStatus()<cr>
+amenu &CVS.&Diff\ 						:call CVSdiff()<cr>
+amenu &CVS.A&nnotate\ 						:call CVSannotate()<cr>
+amenu &CVS.Histo&ry\ 						:call CVShistory()<cr>
+amenu &CVS.&Log\ 						:call CVSlog()<cr>
+amenu &CVS.&Status\ 						:call CVSstatus()<cr>
+amenu &CVS.S&hort\ status\ 					:call CVSshortstatus()<cr>
+amenu &CVS.Lo&cal\ status\ 					:call CVSLocalStatus()<cr>
 amenu &CVS.-SEP3-						:
-amenu &CVS.\ Check&out						:call CVScheckout()<cr>
-amenu &CVS.\ &Query\ update					:call CVSqueryupdate()<cr>
-amenu &CVS.\ &Update						:call CVSupdate()<cr>
-amenu &CVS.\ Re&vert\ changes					:call CVSrevertchanges()<cr>
+amenu &CVS.Check&out\ 						:call CVScheckout()<cr>
+amenu &CVS.&Query\ update\ 					:call CVSqueryupdate()<cr>
+amenu &CVS.&Update\ 						:call CVSupdate()<cr>
+amenu &CVS.Re&vert\ changes\ 					:call CVSrevertchanges()<cr>
 amenu &CVS.-SEP4-						:
-amenu &CVS.\ &Add						:call CVSadd()<cr>
-amenu &CVS.\ Comm&it						:call CVScommit()<cr>
-amenu &CVS.\ Im&port						:call CVSimport()<cr>
-amenu &CVS.\ &Join\ in						:call CVSjoinin()<cr>
+amenu &CVS.&Add\ 						:call CVSadd()<cr>
+amenu &CVS.Comm&it\ 						:call CVScommit()<cr>
+amenu &CVS.Im&port\ 						:call CVSimport()<cr>
+amenu &CVS.&Join\ in\ 						:call CVSjoinin()<cr>
 
 " create key mappings from this script		{{{1
 " key mappings : <Leader> (mostly '\' ?), then same as menu hotkeys
@@ -287,6 +286,21 @@ function! CVSMappingFromMenu(filename,...)
 endfunction
 
 "-----------------------------------------------------------------------------
+" escape user message	{{{1
+"-----------------------------------------------------------------------------
+function! CVSEscapeMessage(msg)
+  if has('unix')
+    let result = escape(a:msg,'"\\')
+  else
+    let result = escape(a:msg,'"')
+    if &shell =~? 'cmd\.exe' && &shellxquote == '"'
+      let result = substitute(result,'\([&<>|^]\)','^\1','g')
+    endif
+  endif
+  return result
+endfunction
+
+"-----------------------------------------------------------------------------
 " show cvs info		{{{1
 "-----------------------------------------------------------------------------
 " Param : ToBuffer (bool)
@@ -312,7 +326,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.94 $"
+    \."\n\"CVSmenu $Revision: 1.96 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -1097,7 +1111,7 @@ endfunction
 
 function! CVSDoTag(usertag,tagopt)
   " force tagname input
-  let tagname=escape(input('tagname: '),s:esc_pat)
+  let tagname = CVSEscapeMessage(input('tagname: '))
   if tagname==''
     echo 'CVS tag: aborted'
     return
@@ -1327,7 +1341,7 @@ function! CVSadd()
     let message = g:CVSdefaultmsg
   else
     " force message input
-    let message=escape(input('Message: '),s:esc_pat)
+    let message = CVSEscapeMessage(input('Message: '))
   endif
   if (g:CVSallowemptymsg !~ 'a') && (message == '')
     echo 'CVS add: aborted'
@@ -1346,7 +1360,7 @@ function! CVScommit()
     let message = g:CVSdefaultmsg
   else
     " force message input
-    let message=escape(input('Message: '),s:esc_pat)
+    let message = CVSEscapeMessage(input('Message: '))
   endif
   if (g:CVSallowemptymsg !~ 'i') && (message == '')
     echo 'CVS commit: aborted'
@@ -1391,7 +1405,7 @@ function! CVSjoinin(...)
     let message = g:CVSdefaultmsg
   else
     " force message input
-    let message=escape(input('Message: '),s:esc_pat)
+    let message = CVSEscapeMessage(input('Message: '))
     if (g:CVSallowemptymsg !~ 'j') && (message == '')
       echo 'CVS add/commit: aborted'
       return
@@ -1428,7 +1442,7 @@ function! CVSimport()
     let message = g:CVSdefaultmsg
   else
     " force message input
-    let message=escape(input('Message: '),s:esc_pat)
+    let message = CVSEscapeMessage(input('Message: '))
   endif
   if (g:CVSallowemptymsg !~ 'p') && (message == '')
     echo 'CVS import: aborted'
