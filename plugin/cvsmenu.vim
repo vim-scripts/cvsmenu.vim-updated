@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Contributor : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.96 $
-" $Date: 2005/03/28 15:52:20 $
+" $Revision: 1.97 $
+" $Date: 2005/04/05 03:01:32 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -236,9 +236,20 @@ amenu &CVS.&Join\ in\ 						:call CVSjoinin()<cr>
 " key mappings : <Leader> (mostly '\' ?), then same as menu hotkeys
 " e.g. <ALT>ci = \ci = CVS.Commit
 function! CVSMakeLeaderMapping()
-  let cvsmenu=expand("$VIM").s:sep.'plugin'.s:sep.'cvsmenu.vim'
-  silent! call CVSMappingFromMenu(cvsmenu,',')
-  unlet cvsmenu
+  silent! call CVSMappingFromMenu(CVSFindScript(),',')
+endfunction
+
+function! CVSFindScript()
+  let runtimepaths = &runtimepath.','
+  while strlen(runtimepaths) != 0
+    let filepath = substitute(runtimepaths,',.*','','').
+                            \s:sep.'plugin'.s:sep.'cvsmenu.vim'
+    if filereadable(filepath)
+      return filepath
+    endif
+    let runtimepaths = substitute(runtimepaths,'[^,]*,','','')
+  endwhile
+  return ''
 endfunction
 
 function! CVSMappingFromMenu(filename,...)
@@ -326,7 +337,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.96 $"
+    \."\n\"CVSmenu $Revision: 1.97 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
