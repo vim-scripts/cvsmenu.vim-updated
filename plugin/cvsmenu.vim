@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Contributor : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.97 $
-" $Date: 2005/04/05 03:01:32 $
+" $Revision: 1.100 $
+" $Date: 2005/04/13 07:26:57 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -90,6 +90,8 @@ if has('unix')				" path separator
 else
   let s:sep='\'
 endif
+let s:script_path=expand('<sfile>:p:h')	" location of this script
+let s:script_name=expand('<sfile>:p:t')	" should be 'cvsmenu.vim'
 let s:CVSentries='CVS'.s:sep.'Entries'	" location of 'CVS/Entries' file
 let s:cvsmenuhttp="http://cvs.sf.net/cgi-bin/viewcvs.cgi/~checkout~/ezytools/VimTools/"
 let s:cvsmenucvs=":pserver:anonymous@cvs.sf.net:/cvsroot/ezytools"
@@ -236,20 +238,7 @@ amenu &CVS.&Join\ in\ 						:call CVSjoinin()<cr>
 " key mappings : <Leader> (mostly '\' ?), then same as menu hotkeys
 " e.g. <ALT>ci = \ci = CVS.Commit
 function! CVSMakeLeaderMapping()
-  silent! call CVSMappingFromMenu(CVSFindScript(),',')
-endfunction
-
-function! CVSFindScript()
-  let runtimepaths = &runtimepath.','
-  while strlen(runtimepaths) != 0
-    let filepath = substitute(runtimepaths,',.*','','').
-                            \s:sep.'plugin'.s:sep.'cvsmenu.vim'
-    if filereadable(filepath)
-      return filepath
-    endif
-    let runtimepaths = substitute(runtimepaths,'[^,]*,','','')
-  endwhile
-  return ''
+  silent! call CVSMappingFromMenu(s:script_path.s:sep.s:script_name,',')
 endfunction
 
 function! CVSMappingFromMenu(filename,...)
@@ -337,7 +326,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.97 $"
+    \."\n\"CVSmenu $Revision: 1.100 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -728,7 +717,7 @@ endfunction
 
 " return > 0 if is win 95-me
 function! CVSIsW9x()
-  return (has("win32") && (match($COMSPEC,"command\.com") > -1))
+  return has("win32") && (match($COMSPEC,"command\.com") > -1)
 endfunction
 
 function! CVSDoCommand(cmd,...)
@@ -739,7 +728,7 @@ function! CVSDoCommand(cmd,...)
   call CVSChDir(expand('%:p:h'))
   " get file/directory to work on (if not given)
   if a:0 < 1
-    if g:CVSforcedirectory>0
+    if g:CVSforcedirectory > 0
       let filename=''
     else
       let filename=expand('%:p:t')
@@ -772,10 +761,10 @@ endfunction
 " also jumped in by CVSLocalStatus
 function! CVSProcessOutput(isfile,filename,cmd)
   " delete leading and trainling blank lines
-  while (getline(1) == '') && (line("$")>1)
+  while getline(1) == '' && line("$") > 1
     silent exec '0d'
   endwhile
-  while (getline("$") == '') && (line("$")>1)
+  while getline("$") == '' && line("$") > 1
     silent exec '$d'
   endwhile
   " group conflicts, updates, ....
@@ -792,7 +781,7 @@ function! CVSProcessOutput(isfile,filename,cmd)
   normal gg
   set nowrap
   " reset single shot flag
-  if g:CVSforcedirectory==1
+  if g:CVSforcedirectory == 1
     let g:CVSforcedirectory = 0
   endif
   call CVSMakeRO()
@@ -827,9 +816,9 @@ function! CVSCompressOutput(cmd)
 	silent! exec 'g!/^new revision:/d'
       endif
     " skip localstatus
-    elseif (match(a:cmd,"localstatus") > -1)
+    elseif match(a:cmd,"localstatus") > -1
     " status
-    elseif (match(a:cmd,"status") > -1)
+    elseif match(a:cmd,"status") > -1
       silent! exec 'g/^=\+$/d'
       silent! exec 'g/^$/d'
       silent! exec '%s/.*Status: //'
@@ -1147,7 +1136,7 @@ function! CVSDoTag(usertag,tagopt)
   if (tagby == 'd')
     let tagby='-D '
     let tagwhat=input('Enter date: ')
-  elseif (tagby == 'r')
+  elseif tagby == 'r'
     let tagby='-r '
     let tagwhat=CVSInputRev('Revision (optional): ')
   else 
@@ -1386,8 +1375,13 @@ function! CVScommit()
   if rev!=''
     let rev='-r '.rev.' '
   endif
+  if g:CVSforcedirectory > 0
+    let forcedir=1
+  else
+    let forcedir=0
+  endif
   call CVSDoCommand('commit -m "'.message.'" '.rev)
-  if g:CVSreloadaftercommit > 0
+  if g:CVSreloadaftercommit > 0 && forcedir == 0
     let laststatus=g:CVSlaststatus
     edit
     redraw!
@@ -1395,7 +1389,7 @@ function! CVScommit()
     let g:CVSlaststatus=laststatus
     unlet laststatus
   endif
-  unlet message rev
+  unlet message rev forcedir
 endfunction
 
 function! CVScommitrevision()
@@ -1412,7 +1406,7 @@ endfunction
 function! CVSjoinin(...)
   if a:0 == 1
     let message = a:1
-  elseif (g:CVSusedefaultmsg =~ 'j') && (g:CVSdefaultmsg != '')
+  elseif g:CVSusedefaultmsg =~ 'j' && g:CVSdefaultmsg != ''
     let message = g:CVSdefaultmsg
   else
     " force message input
@@ -1724,8 +1718,7 @@ endfunction
 "-----------------------------------------------------------------------------
 
 function! CVSInstallUpdates()
-  if confirm("Install updates: Close all buffers, first !", 
-           \ "&Cancel\n&Ok") < 2
+  if confirm("Install updates: Close all buffers, first !","&Cancel\n&Ok") < 2
     echo 'CVS Install updates: aborted'
     return
   endif
@@ -1758,7 +1751,7 @@ endfunction
 function! CVSInstallAsHelp(...)
   " ask for name to save as (if not given)
   if (a:0 == 0) || (a:1 == '')
-    let dest=input('Helpfilename (clear to abort): ')
+    let dest=input('Help file name (clear to abort): ','cvsmenu.txt')
   else
     let dest=a:1
   endif
@@ -1766,7 +1759,7 @@ function! CVSInstallAsHelp(...)
   if dest==''
     echo 'CVS Install help: aborted'
   else
-    " create directories "~/.vim/doc" if needed
+    " create directory like "~/.vim/doc" if needed
     call CVSAssureLocalDirs()
     " copy to local doc dir
     exec 'w! '.s:localvimdoc.'/'.dest
@@ -1779,7 +1772,7 @@ endfunction
 function! CVSInstallAsPlugin(...)
   " ask for name to save as
   if (a:0 == 0) || (a:1 == '')
-    let dest=input('Pluginfilename (clear to abort): ',a:1)
+    let dest=input('Plugin file name (clear to abort): ','cvsmenu.vim')
   else
     let dest=a:1
   endif
@@ -1788,7 +1781,7 @@ function! CVSInstallAsPlugin(...)
     echo 'CVS Install plugin: aborted'
   else
     " copy to plugin dir
-    exec 'w! '.$VIMRUNTIME.'/plugin/'.dest
+    exec 'w! '.s:script_path.s:sep.dest
   endif
   unlet dest
 endfunction
@@ -1834,26 +1827,13 @@ function! CVSOpenLinks()
 endfunction
 
 function! CVSAssureLocalDirs()
-  if !isdirectory(s:localvim)
-    silent! exec '!mkdir '.s:localvim
-  endif
   if !isdirectory(s:localvimdoc)
     silent! exec '!mkdir '.s:localvimdoc
   endif
 endfunction
 
 function! CVSGetFolderNames()
-  if has("unix")
-    " expands to /home/(user)
-    let s:localvim=expand('~').s:sep.'.vim'
-  else
-    " expands to $HOME (must be set)
-    if expand('~') == ''
-      let s:localvim=$VIMRUNTIME
-    else
-      let s:localvim=expand('~').s:sep.'vimfiles'
-    endif
-  endif
+  let s:localvim=s:script_path.s:sep.'..'
   let s:localvimdoc=s:localvim.s:sep.'doc'
 endfunction
 
@@ -2003,7 +1983,7 @@ function! CVSGetLocalDirStatus(...)
   " collect status of all found files in @y
   let @y = ''
   let curlin = 0
-  while (curlin < filecount)
+  while curlin < filecount
     let curlin = curlin + 1
     let fn=getline(curlin)
     if fn != 'CVS'
@@ -2024,7 +2004,7 @@ function! CVSGetLocalDirStatus(...)
   endwhile
   " process files from CVS/Entries
   let curlin = filecount
-  while (curlin < line("$"))
+  while curlin < line("$")
     let curlin = curlin + 1
     let entry = getline(curlin)
     let fn=CVSSubstr(entry,'/',1)
@@ -2136,7 +2116,7 @@ function! CVSSubstr(string,separator,index)
   let sub = ''
   let idx = 0
   let bst = 0
-  while (bst < strlen(a:string)) && (idx <= a:index)
+  while bst < strlen(a:string) && idx <= a:index
     if a:string[bst] == a:separator
       let idx = idx + 1
     else
