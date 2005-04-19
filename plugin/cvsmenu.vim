@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Contributor : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.100 $
-" $Date: 2005/04/13 07:26:57 $
+" $Revision: 1.102 $
+" $Date: 2005/04/18 14:44:17 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -164,18 +164,18 @@ amenu &CVS.&Keyword\ .RCS&file\ 				a$RCSfile<esc>a$<esc>
 amenu &CVS.&Keyword\ .&Revision\ 				a$Revision<esc>a$<esc>
 amenu &CVS.&Keyword\ .&Source\ 					a$Source<esc>a$<esc>
 amenu &CVS.&Keyword\ .S&tate\ 					a$State<esc>a$<esc>
-amenu &CVS.Director&y\ .&Log\ 					:call CVSSetForceDir(1)<cr>:call CVSlog()<cr>
-amenu &CVS.Director&y\ .&Status\ 				:call CVSSetForceDir(1)<cr>:call CVSstatus()<cr>
-amenu &CVS.Director&y\ .S&hort\ status\ 			:call CVSSetForceDir(1)<cr>:call CVSshortstatus()<cr>
-amenu &CVS.Director&y\ .Lo&cal\ status\ 			:call CVSSetForceDir(1)<cr>:call CVSLocalStatus()<cr>
+amenu &CVS.Director&y\ .&Log\ 					:call CVSlog_dir()<cr>
+amenu &CVS.Director&y\ .&Status\ 				:call CVSstatus_dir()<cr>
+amenu &CVS.Director&y\ .S&hort\ status\ 			:call CVSshortstatus_dir()<cr>
+amenu &CVS.Director&y\ .Lo&cal\ status\ 			:call CVSLocalStatus_dir()<cr>
 amenu &CVS.Director&y\ .-SEP1-					:
-amenu &CVS.Director&y\ .&Query\ update\ 			:call CVSSetForceDir(1)<cr>:call CVSqueryupdate()<cr>
-amenu &CVS.Director&y\ .&Update\ 				:call CVSSetForceDir(1)<cr>:call CVSupdate()<cr>
+amenu &CVS.Director&y\ .&Query\ update\ 			:call CVSqueryupdate_dir()<cr>
+amenu &CVS.Director&y\ .&Update\ 				:call CVSupdate_dir()<cr>
 amenu &CVS.Director&y\ .-SEP2-					:
-amenu &CVS.Director&y\ .&Add\ 					:call CVSSetForceDir(1)<cr>:call CVSadd()<cr>
-amenu &CVS.Director&y\ .Comm&it\ 				:call CVSSetForceDir(1)<cr>:call CVScommit()<cr>
+amenu &CVS.Director&y\ .&Add\ 					:call CVSadd_dir()<cr>
+amenu &CVS.Director&y\ .Comm&it\ 				:call CVScommit_dir()<cr>
 amenu &CVS.Director&y\ .-SEP3-					:
-amenu &CVS.Director&y\ .Re&move\ from\ repositoy\ 		:call CVSSetForceDir(1)<cr>:call CVSremove()<cr>
+amenu &CVS.Director&y\ .Re&move\ from\ repositoy\ 		:call CVSremove_dir()<cr>
 amenu &CVS.E&xtra\ .&Create\ patchfile\ .&Context\ 		:call CVSdiffcontext()<cr>
 amenu &CVS.E&xtra\ .&Create\ patchfile\ .&Standard\ 		:call CVSdiffstandard()<cr>
 amenu &CVS.E&xtra\ .&Create\ patchfile\ .&Uni\ 			:call CVSdiffuni()<cr>
@@ -326,7 +326,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.100 $"
+    \."\n\"CVSmenu $Revision: 1.102 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -1007,6 +1007,11 @@ function! CVSstatus()
   call CVSDoCommand('status')
 endfunction
 
+function! CVSstatus_dir()
+  call CVSSetForceDir(1)
+  call CVSstatus()
+endfunction
+
 function! CVShistory()
   call CVSSaveOpts()
   let g:CVSdumpandclose = 0
@@ -1032,6 +1037,11 @@ function! CVSlog()
   endif
   call CVSDoCommand('log'.rev)
   call CVSRestoreOpts()
+endfunction
+
+function! CVSlog_dir()
+  call CVSSetForceDir(1)
+  call CVSlog()
 endfunction
 
 " log between specific revisions
@@ -1241,10 +1251,20 @@ function! CVSupdate()
   unlet rev mergerevstart mergerevend
 endfunction
 
+function! CVSupdate_dir()
+  call CVSSetForceDir(1)
+  call CVSupdate()
+endfunction
+
 function! CVSqueryupdate()
   let s:CVSupdatequeryonly = 1
   call CVSupdate()
   let s:CVSupdatequeryonly = 0
+endfunction
+
+function! CVSqueryupdate_dir()
+  call CVSSetForceDir(1)
+  call CVSqueryupdate()
 endfunction
 
 function! CVSupdatetorev()
@@ -1332,6 +1352,11 @@ function! CVSremove()
   unlet localtoo
 endfunction
 
+function! CVSremove_dir()
+  call CVSSetForceDir(1)
+  call CVSremove()
+endfunction
+
 "-----------------------------------------------------------------------------
 " CVS add		{{{1
 "-----------------------------------------------------------------------------
@@ -1349,6 +1374,11 @@ function! CVSadd()
   endif
   call CVSDoCommand('add -m "'.message.'"')
   unlet message
+endfunction
+
+function! CVSadd_dir()
+  call CVSSetForceDir(1)
+  call CVSadd()
 endfunction
 
 "-----------------------------------------------------------------------------
@@ -1390,6 +1420,11 @@ function! CVScommit()
     unlet laststatus
   endif
   unlet message rev forcedir
+endfunction
+
+function! CVScommit_dir()
+  call CVSSetForceDir(1)
+  call CVScommit()
 endfunction
 
 function! CVScommitrevision()
@@ -1580,6 +1615,11 @@ function! CVSshortstatus()
     call CVSDumpAndClose()
   endif
   unlet savedump forcedirbak filename isfile
+endfunction
+
+function! CVSshortstatus_dir()
+  call CVSSetForceDir(1)
+  call CVSshortstatus()
 endfunction
 
 "-----------------------------------------------------------------------------
@@ -1863,6 +1903,11 @@ function! CVSLocalStatus()
   let @z=regbak
   call CVSRestoreDir()
   unlet filename
+endfunction
+
+function! CVSLocalStatus_dir()
+  call CVSSetForceDir(1)
+  call CVSLocalStatus()
 endfunction
 
 " get info from CVS/Entries about given/current buffer/dir
