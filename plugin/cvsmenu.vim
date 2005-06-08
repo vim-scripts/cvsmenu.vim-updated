@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Contributor : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.104 $
-" $Date: 2005/04/28 09:33:02 $
+" $Revision: 1.102 $
+" $Date: 2005/04/18 14:44:17 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -95,7 +95,6 @@ let s:script_name=expand('<sfile>:p:t')	" should be 'cvsmenu.vim'
 let s:CVSentries='CVS'.s:sep.'Entries'	" location of 'CVS/Entries' file
 let s:cvsmenuhttp="http://cvs.sf.net/cgi-bin/viewcvs.cgi/~checkout~/ezytools/VimTools/"
 let s:cvsmenucvs=":pserver:anonymous@cvs.sf.net:/cvsroot/ezytools"
-let s:CVSdontupdatemapping = 0		" don't CVSUpdateMapping (internal!)
 let s:CVSupdatequeryonly = 0		" update -n (internal!)
 let s:CVSorgtitle = &titlestring	" backup of original title
 let g:orgpath = getcwd()
@@ -327,7 +326,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.104 $"
+    \."\n\"CVSmenu $Revision: 1.102 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -473,8 +472,8 @@ function! CVSShowMapping()
   echo 'Mappings in output buffer :'
   echo '<2-LeftMouse> , <SHIFT-CR>      : open file in new buffer'
   echo 'q                               : close output buffer'
-  echo '?                               : show this help'
-  echo '<Leader>a                       : open file and CVSadd'
+  echo '?                               : close output buffer'
+  echo '<Leader>a                       : Show this help'
   echo '<Leader>d                       : open file and CVSdiff'
   echo '<Leader>i                       : open file and CVScommit'
   echo '<Leader>u                       : open file and CVSupdate'
@@ -789,12 +788,9 @@ function! CVSProcessOutput(isfile,filename,cmd)
   if (g:CVSdumpandclose == 1) || ((g:CVSdumpandclose == 2) && a:isfile)
     call CVSDumpAndClose()
   else
-    if s:CVSdontupdatemapping == 0
-      call CVSUpdateMapping()
-    endif
+    call CVSUpdateMapping()
     call CVSUpdateSyntax()
   endif
-  let s:CVSdontupdatemapping = 0
 endfunction
 
 " return: 1=file 0=dir
@@ -1002,7 +998,6 @@ function! CVSannotate()
   call CVSSaveOpts()
   let g:CVSdumpandclose = 0
   let g:CVStitlebar = 0
-  let s:CVSdontupdatemapping = 1
   call CVSDoCommand('annotate',expand('%:p:t'))
   wincmd _
   call CVSRestoreOpts()
@@ -1020,7 +1015,6 @@ endfunction
 function! CVShistory()
   call CVSSaveOpts()
   let g:CVSdumpandclose = 0
-  let s:CVSdontupdatemapping = 1
   call CVSDoCommand('history')
   call CVSRestoreOpts()
 endfunction
@@ -1041,7 +1035,6 @@ function! CVSlog()
   if rev!=''
     let rev=' -r'.rev.' '
   endif
-  let s:CVSdontupdatemapping = 1
   call CVSDoCommand('log'.rev)
   call CVSRestoreOpts()
 endfunction
