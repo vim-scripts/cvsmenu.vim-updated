@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
-" Contributor : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.109 $
-" $Date: 2005/07/07 10:48:14 $
+" Maintainer : Wu Yongwei <adah@sh163.net>
+" $Revision: 1.112 $
+" $Date: 2005/09/23 02:56:39 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -74,11 +74,11 @@ endif
 if !exists("g:CVSfullstatus")
   let g:CVSfullstatus = 0		" display all fields for fullstatus
 endif
+if !exists("g:CVSspacesinannotate")
+  let g:CVSspacesinannotate = 1		" spaces to add in annotated source
+endif
 if !exists("g:CVSreloadaftercommit")
   let g:CVSreloadaftercommit = 1	" reload file to update CVS keywords
-endif
-if !exists("g:CVSaddspaceafterannotate")
-  let g:CVSaddspaceafterannotate = 1	" add spaces in annotated source
 endif
 
 " problems with :help on console
@@ -330,12 +330,11 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.109 $"
+    \."\n\"CVSmenu $Revision: 1.112 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
-    \."\n\"\t\t\t\t  set environment var to cvsroot"
-    \."\nlet $CVSROOT\t\t= \'"			.$CVSROOT."\'"
+    \."\nlet $CVSROOT\t\t= \'"			.$CVSROOT."\'"			."\t\" set environment var to cvsroot"
     \."\nlet $CVS_RSH\t\t= \'"			.$CVS_RSH."\'"			."\t\" set environment var to rsh/ssh"
     \."\nlet $CVSOPT\t\t= \'"			.$CVSOPT."\'"			."\t\" set cvs options (see cvs --help-options)"
     \."\nlet $CVSCMDOPT\t\t= \'"		.$CVSCMDOPT."\'"		."\t\" set cvs command options"
@@ -355,6 +354,8 @@ function! CVSShowInfo(...)
     \."\nlet g:CVSusedefaultmsg\t= \'"		.g:CVSusedefaultmsg."\'"	."\t\" a:Add, i:Commit, j:Join in, p:Import"
     \."\nlet g:CVSallowemptymsg\t= \'"		.g:CVSallowemptymsg."\'"	."\t\" a:Add, i:Commit, j:Join in, p:Import"
     \."\nlet g:CVSfullstatus\t= "		.g:CVSfullstatus		."\t\" display all fields for fullstatus"
+    \."\nlet g:CVSspacesinannotate = "		.g:CVSspacesinannotate		."\t\" spaces to add in annotated source"
+    \."\nlet g:CVSreloadaftercommit = "		.g:CVSreloadaftercommit		."\t\" reload file to update CVS keywords"
     \."\n\"----------------------------------------"
     \."\n\" Change above values to your needs."
     \."\n\" To execute a line, put the cursor on it and press <shift-cr> or doubleclick."
@@ -1015,9 +1016,9 @@ function! CVSannotate()
   let g:CVStitlebar = 0
   let s:CVSdontupdatemapping = 1
   call CVSDoCommand('annotate',expand('%:p:t'))
-  if g:CVSaddspaceafterannotate > 0
+  if g:CVSspacesinannotate > 0	" insert spaces to make TABs align better
     let spaces = ''
-    let space_cnt = g:CVSaddspaceafterannotate
+    let space_cnt = g:CVSspacesinannotate
     while space_cnt > 0
       let spaces = spaces . ' '
       let space_cnt = space_cnt - 1
@@ -1418,6 +1419,10 @@ endfunction
 "-----------------------------------------------------------------------------
 
 function! CVScommit()
+  if &modified && g:CVSforcedirectory == 0
+    echo 'CVS commit: file not saved!'
+    return
+  endif
   if (g:CVSusedefaultmsg =~ 'i') && (g:CVSdefaultmsg != '')
     let message = g:CVSdefaultmsg
   else
@@ -1442,8 +1447,16 @@ function! CVScommit()
   else
     let forcedir=0
   endif
+  if g:CVSreloadaftercommit > 0 && forcedir == 0
+    checktime
+    " Using 'FileChangedShell' is a trick to avoid the Vim prompt to
+    " reload the file
+    exec 'au FileChangedShell ' . expand('%') . ' let $CVSOPT=$CVSOPT'
+  endif
   call CVSDoCommand('commit -m "'.message.'" '.rev)
   if g:CVSreloadaftercommit > 0 && forcedir == 0
+    checktime
+    exec 'au! FileChangedShell ' . expand('%')
     let laststatus=g:CVSlaststatus
     edit
     redraw!
