@@ -1,8 +1,8 @@
-" CVSmenu.vim : Vim menu for using CVS			vim:tw=0
+" CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.112 $
-" $Date: 2005/09/23 02:56:39 $
+" $Revision: 1.114 $
+" $Date: 2005/10/14 11:42:03 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -79,6 +79,12 @@ if !exists("g:CVSspacesinannotate")
 endif
 if !exists("g:CVSreloadaftercommit")
   let g:CVSreloadaftercommit = 1	" reload file to update CVS keywords
+endif
+if !exists("g:CVScvsoutputencoding")
+  let g:CVScvsoutputencoding = ''	" the encoding of CVS(NT) output
+endif
+if !exists("g:CVSdontconvertfor")
+  let g:CVSdontconvertfor = ''		" commands that need no conversion
 endif
 
 " problems with :help on console
@@ -330,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.112 $"
+    \."\n\"CVSmenu $Revision: 1.114 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -356,6 +362,8 @@ function! CVSShowInfo(...)
     \."\nlet g:CVSfullstatus\t= "		.g:CVSfullstatus		."\t\" display all fields for fullstatus"
     \."\nlet g:CVSspacesinannotate = "		.g:CVSspacesinannotate		."\t\" spaces to add in annotated source"
     \."\nlet g:CVSreloadaftercommit = "		.g:CVSreloadaftercommit		."\t\" reload file to update CVS keywords"
+    \."\nlet g:CVScvsoutputencoding = \'"	.g:CVScvsoutputencoding."\'"	."\t\" the encoding of CVS(NT) output"
+    \."\nlet g:CVSdontconvertfor = \'"		.g:CVSdontconvertfor."\'"	."\t\" commands that need no conversion"
     \."\n\"----------------------------------------"
     \."\n\" Change above values to your needs."
     \."\n\" To execute a line, put the cursor on it and press <shift-cr> or doubleclick."
@@ -755,13 +763,18 @@ function! CVSDoCommand(cmd,...)
   " Using 'exec' creates a confirm prompt - only use this s**t on w9x
   if CVSIsW9x()
     let tmp=tempname()
-    exec '!'.$CVSCMD.' '.$CVSOPT.' '.a:cmd.' '.$CVSCMDOPT.' '.filename.'>'.tmp
+    silent exec '!'.$CVSCMD.' '.$CVSOPT.' '.a:cmd.' '.$CVSCMDOPT.' '.filename.'>'.tmp
     exec 'split '.tmp
     let dummy=delete(tmp)
     unlet tmp dummy
   else
     let regbak=@z
     let @z=system($CVSCMD.' '.$CVSOPT.' '.a:cmd.' '.$CVSCMDOPT.' '.filename)
+    if has('iconv')
+	  \&& g:CVScvsoutputencoding != ''
+	  \&& ','.g:CVSdontconvertfor.',' !~ ','.a:cmd.','
+      let @z=iconv(@z, g:CVScvsoutputencoding, &encoding)
+    endif
     new
     silent normal "zP
     let @z=regbak
@@ -1119,7 +1132,11 @@ function! CVSwatchedit()
 endfunction
 
 function! CVSwatchunedit()
-  call CVSDoCommand('unedit')
+  "call CVSDoCommand('unedit')
+  " Do not use the original method of CVSDoCommand since `cvs unedit'
+  " may prompt to revert changes if cvsnt is used.
+  silent! exec '!'.$CVSCMD.' '.$CVSOPT.' unedit '.$CVSCMDOPT.' '.file
+  unlet filename
 endfunction
 
 "-----------------------------------------------------------------------------
