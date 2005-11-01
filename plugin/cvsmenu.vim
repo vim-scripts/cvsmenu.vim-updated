@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.114 $
-" $Date: 2005/10/14 11:42:03 $
+" $Revision: 1.116 $
+" $Date: 2005/10/28 04:52:56 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -336,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.114 $"
+    \."\n\"CVSmenu $Revision: 1.116 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -1436,7 +1436,7 @@ endfunction
 "-----------------------------------------------------------------------------
 
 function! CVScommit()
-  if &modified && g:CVSforcedirectory == 0
+  if (&modified || expand('%') == '') && (g:CVSforcedirectory == 0)
     echo 'CVS commit: file not saved!'
     return
   endif
@@ -2300,6 +2300,7 @@ function! CVSBufWrite()
   " query status if wanted, file and CVSdir exist
   if (g:CVSautocheck > 0)
    \ && (expand("%:p:t") != '')
+   \ && filereadable(expand("%:p:t"))
    \ && filereadable(expand("%:p:h").s:sep.s:CVSentries)
     call CVSLocalStatus()
   endif
