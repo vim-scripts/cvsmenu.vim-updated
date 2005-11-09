@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.116 $
-" $Date: 2005/10/28 04:52:56 $
+" $Revision: 1.118 $
+" $Date: 2005/11/09 11:46:55 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -300,7 +300,7 @@ endfunction
 "-----------------------------------------------------------------------------
 function! CVSEscapeMessage(msg)
   if has('unix')
-    let result = escape(a:msg,'"\\')
+    let result = escape(a:msg,'"`\\')
   else
     let result = escape(a:msg,'"')
     if &shell =~? 'cmd\.exe' && &shellxquote == '"'
@@ -336,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.116 $"
+    \."\n\"CVSmenu $Revision: 1.118 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -1468,12 +1468,12 @@ function! CVScommit()
     checktime
     " Using 'FileChangedShell' is a trick to avoid the Vim prompt to
     " reload the file
-    exec 'au FileChangedShell ' . expand('%') . ' let $CVSOPT=$CVSOPT'
+    exec 'au FileChangedShell * let $CVSOPT=$CVSOPT'
   endif
   call CVSDoCommand('commit -m "'.message.'" '.rev)
   if g:CVSreloadaftercommit > 0 && forcedir == 0
     checktime
-    exec 'au! FileChangedShell ' . expand('%')
+    exec 'au! FileChangedShell *'
     let laststatus=g:CVSlaststatus
     edit
     redraw!
