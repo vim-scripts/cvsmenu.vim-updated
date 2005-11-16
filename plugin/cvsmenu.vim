@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.118 $
-" $Date: 2005/11/09 11:46:55 $
+" $Revision: 1.121 $
+" $Date: 2005/11/16 08:00:40 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -44,23 +44,23 @@ endif
 if !exists("g:CVScompressoutput")
   let g:CVScompressoutput = 1		" show extended output only if error
 endif
-if !exists("g:CVSstatusline")
-  let g:CVSstatusline = 1		" Notification output to statusline
-endif
 if !exists("g:CVStitlebar")
-  let g:CVStitlebar = 1			" Notification output to titlebar
+  let g:CVStitlebar = 1			" notification output to titlebar
+endif
+if !exists("g:CVSstatusline")
+  let g:CVSstatusline = 1		" notification output to statusline
+endif
+if !exists("g:CVSautocheck")
+  let g:CVSautocheck = 1		" do local status on every read/write
 endif
 if !exists("g:CVSofferrevision")
-  let g:CVSofferrevision = 1		" Offer current revision on queries
+  let g:CVSofferrevision = 1		" offer current revision on queries
 endif
 if !exists("g:CVSsavediff")
   let g:CVSsavediff = 1			" save settings when using :diff
 endif
 if !exists("g:CVSdontswitch")
-  let g:CVSdontswitch = 0		" dont switch to diffed file
-endif
-if !exists("g:CVSautocheck")
-  let g:CVSautocheck = 1		" do local status on every read/write
+  let g:CVSdontswitch = 0		" don't switch to diffed file
 endif
 if !exists("g:CVSdefaultmsg")
   let g:CVSdefaultmsg = ''		" message to use for commands below
@@ -74,11 +74,11 @@ endif
 if !exists("g:CVSfullstatus")
   let g:CVSfullstatus = 0		" display all fields for fullstatus
 endif
-if !exists("g:CVSspacesinannotate")
-  let g:CVSspacesinannotate = 1		" spaces to add in annotated source
-endif
 if !exists("g:CVSreloadaftercommit")
   let g:CVSreloadaftercommit = 1	" reload file to update CVS keywords
+endif
+if !exists("g:CVSspacesinannotate")
+  let g:CVSspacesinannotate = 1		" spaces to add in annotated source
 endif
 if !exists("g:CVScvsoutputencoding")
   let g:CVScvsoutputencoding = ''	" the encoding of CVS(NT) output
@@ -303,7 +303,7 @@ function! CVSEscapeMessage(msg)
     let result = escape(a:msg,'"`\\')
   else
     let result = escape(a:msg,'"')
-    if &shell =~? 'cmd\.exe' && &shellxquote == '"'
+    if &shell =~? 'cmd\.exe'
       let result = substitute(result,'\([&<>|^]\)','^\1','g')
     endif
   endif
@@ -336,16 +336,16 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.118 $"
+    \."\n\"CVSmenu $Revision: 1.121 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
-    \."\nlet $CVSROOT\t\t= \'"			.$CVSROOT."\'"			."\t\" set environment var to cvsroot"
-    \."\nlet $CVS_RSH\t\t= \'"			.$CVS_RSH."\'"			."\t\" set environment var to rsh/ssh"
-    \."\nlet $CVSOPT\t\t= \'"			.$CVSOPT."\'"			."\t\" set cvs options (see cvs --help-options)"
-    \."\nlet $CVSCMDOPT\t\t= \'"		.$CVSCMDOPT."\'"		."\t\" set cvs command options"
-    \."\nlet $CVSCMD\t\t\= '"			.$CVSCMD."\'"			."\t\" set cvs command"
-    \."\nlet g:CVSforcedirectory\t= "		.g:CVSforcedirectory		."\t\" refer to directory instead of current file"
+    \."\nlet $CVSROOT\t\t= \'"			.$CVSROOT."\'"			."\t\" Set environment var to cvsroot"
+    \."\nlet $CVS_RSH\t\t= \'"			.$CVS_RSH."\'"			."\t\" Set environment var to rsh/ssh"
+    \."\nlet $CVSOPT\t\t= \'"			.$CVSOPT."\'"			."\t\" Set cvs options (see cvs --help-options)"
+    \."\nlet $CVSCMDOPT\t\t= \'"		.$CVSCMDOPT."\'"		."\t\" Set cvs command options"
+    \."\nlet $CVSCMD\t\t\= '"			.$CVSCMD."\'"			."\t\" Set cvs command"
+    \."\nlet g:CVSforcedirectory\t= "		.g:CVSforcedirectory		."\t\" Refer to directory instead of current file"
     \."\nlet g:CVSqueryrevision\t= "		.g:CVSqueryrevision		."\t\" Query for revisions (0:no 1:yes)"
     \."\nlet g:CVSdumpandclose\t= "		.g:CVSdumpandclose		."\t\" Output to: 0=buffer 1=notify 2=autoswitch"
     \."\nlet g:CVSsortoutput\t= "		.g:CVSsortoutput		."\t\" Toggle sorting output (0:no sorting)"
@@ -355,15 +355,15 @@ function! CVSShowInfo(...)
     \."\nlet g:CVSautocheck\t= "		.g:CVSautocheck			."\t\" Get local status when file is read/written"
     \."\nlet g:CVSofferrevision\t= "		.g:CVSofferrevision		."\t\" Offer current revision on queries"
     \."\nlet g:CVSsavediff\t= "			.g:CVSsavediff			."\t\" Save settings when using :diff"
-    \."\nlet g:CVSdontswitch\t= "		.g:CVSdontswitch		."\t\" Dont switch to diffed file"
-    \."\nlet g:CVSdefaultmsg\t= \'"		.g:CVSdefaultmsg."\'"		."\t\" message to use for commands below"
+    \."\nlet g:CVSdontswitch\t= "		.g:CVSdontswitch		."\t\" Don't switch to diffed file"
+    \."\nlet g:CVSdefaultmsg\t= \'"		.g:CVSdefaultmsg."\'"		."\t\" Message to use for commands below"
     \."\nlet g:CVSusedefaultmsg\t= \'"		.g:CVSusedefaultmsg."\'"	."\t\" a:Add, i:Commit, j:Join in, p:Import"
     \."\nlet g:CVSallowemptymsg\t= \'"		.g:CVSallowemptymsg."\'"	."\t\" a:Add, i:Commit, j:Join in, p:Import"
-    \."\nlet g:CVSfullstatus\t= "		.g:CVSfullstatus		."\t\" display all fields for fullstatus"
-    \."\nlet g:CVSspacesinannotate = "		.g:CVSspacesinannotate		."\t\" spaces to add in annotated source"
-    \."\nlet g:CVSreloadaftercommit = "		.g:CVSreloadaftercommit		."\t\" reload file to update CVS keywords"
-    \."\nlet g:CVScvsoutputencoding = \'"	.g:CVScvsoutputencoding."\'"	."\t\" the encoding of CVS(NT) output"
-    \."\nlet g:CVSdontconvertfor = \'"		.g:CVSdontconvertfor."\'"	."\t\" commands that need no conversion"
+    \."\nlet g:CVSfullstatus\t= "		.g:CVSfullstatus		."\t\" Display all fields for fullstatus"
+    \."\nlet g:CVSreloadaftercommit = "		.g:CVSreloadaftercommit		."\t\" Reload file to update CVS keywords"
+    \."\nlet g:CVSspacesinannotate = "		.g:CVSspacesinannotate		."\t\" Spaces to add in annotated source"
+    \."\nlet g:CVScvsoutputencoding = \'"	.g:CVScvsoutputencoding."\'"	."\t\" The encoding of CVS(NT) output"
+    \."\nlet g:CVSdontconvertfor = \'"		.g:CVSdontconvertfor."\'"	."\t\" Commands that need no conversion"
     \."\n\"----------------------------------------"
     \."\n\" Change above values to your needs."
     \."\n\" To execute a line, put the cursor on it and press <shift-cr> or doubleclick."
@@ -769,15 +769,25 @@ function! CVSDoCommand(cmd,...)
     unlet tmp dummy
   else
     let regbak=@z
+    if &shell =~? 'cmd\.exe'
+      let shellxquotebak=&shellxquote
+      let &shellxquote='"'
+    endif
     let @z=system($CVSCMD.' '.$CVSOPT.' '.a:cmd.' '.$CVSCMDOPT.' '.filename)
+    if &shell =~? 'cmd\.exe'
+      let &shellxquote=shellxquotebak
+      unlet shellxquotebak
+    endif
+    let cvscmd=matchstr(a:cmd,'\(^\| \)\zs\w\+\>')
     if has('iconv')
 	  \&& g:CVScvsoutputencoding != ''
-	  \&& ','.g:CVSdontconvertfor.',' !~ ','.a:cmd.','
+	  \&& ','.g:CVSdontconvertfor.',' !~ ','.cvscmd.','
       let @z=iconv(@z, g:CVScvsoutputencoding, &encoding)
     endif
     new
     silent normal "zP
     let @z=regbak
+    unlet regbak cvscmd
   endif
   call CVSProcessOutput(isfile, filename, a:cmd)
   call CVSRestoreDir()
