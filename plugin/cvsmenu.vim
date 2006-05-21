@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.122 $
-" $Date: 2006/05/13 10:59:50 $
+" $Revision: 1.123 $
+" $Date: 2006/05/21 15:15:35 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -103,7 +103,7 @@ let s:script_path=expand('<sfile>:p:h')	" location of this script
 let s:script_name=expand('<sfile>:p:t')	" should be 'cvsmenu.vim'
 let s:CVSentries='CVS'.s:sep.'Entries'	" location of 'CVS/Entries' file
 let s:cvsmenuhttp="http://ezytools.cvs.sourceforge.net/ezytools/VimTools/"
-let s:cvsmenucvs=":pserver:anonymous@ezytools.cvs.sf.net:/cvsroot/ezytools"
+let s:cvsmenucvs=":pserver:anonymous@ezytools.cvs.sourceforge.net:/cvsroot/ezytools"
 let s:CVSdontupdatemapping = 0		" don't CVSUpdateMapping (internal!)
 let s:CVSupdatequeryonly = 0		" update -n (internal!)
 let s:CVSorgtitle = &titlestring	" backup of original title
@@ -336,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.122 $"
+    \."\n\"CVSmenu $Revision: 1.123 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -367,7 +367,7 @@ function! CVSShowInfo(...)
     \."\n\"----------------------------------------"
     \."\n\" Change above values to your needs."
     \."\n\" To execute a line, put the cursor on it and press <shift-cr> or doubleclick."
-    \."\n\" Site: http://ezytools.sf.net/VimTools"
+    \."\n\" Site: http://ezytools.cvs.sourceforge.net/ezytools/VimTools/"
   normal "zP
   let @z=zbak
   normal dd
@@ -1917,9 +1917,9 @@ function! CVSOpenLinks()
       \ . "call CVSGet('vim/README.txt', ':pserver:anonymous@cvs.vim.org:/cvsroot/vim', 'io', '')\n\n"
       \ . "\" manual cvsmenu update (-> CVS.Settings.Install buffer as...)\n"
       \ . "\" login, get latest version of cvsmenu.vim\n"
-      \ . "call CVSGet('VimTools/cvsmenu.vim',':pserver:anonymous@ezytools.cvs.sf.net:/cvsroot/ezytools','i','')\n"
+      \ . "call CVSGet('VimTools/cvsmenu.vim',':pserver:anonymous@ezytools.cvs.sourceforge.net:/cvsroot/ezytools','i','')\n"
       \ . "\" get latest cvsmenu.txt, logout\n"
-      \ . "call CVSGet('VimTools/cvsmenu.vim',':pserver:anonymous@ezytools.cvs.sf.net:/cvsroot/ezytools','o','')\n\n"
+      \ . "call CVSGet('VimTools/cvsmenu.vim',':pserver:anonymous@ezytools.cvs.sourceforge.net:/cvsroot/ezytools','o','')\n\n"
       \ . "\" Get some help on this\n"
       \ . "help CVSFunctions"
     "exec ':cd '.s:localvim
