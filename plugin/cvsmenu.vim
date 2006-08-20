@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
-" Maintainer : Wu Yongwei <adah@sh163.net>
-" $Revision: 1.123 $
-" $Date: 2006/05/21 15:15:35 $
+" Maintainer : Wu Yongwei <wuyongwei@gmail.com>
+" $Revision: 1.124 $
+" $Date: 2006/08/20 08:51:37 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -336,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.123 $"
+    \."\n\"CVSmenu $Revision: 1.124 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -1055,6 +1055,7 @@ function! CVSannotate()
   endif
   wincmd _
   call CVSRestoreOpts()
+  silent! nmap <unique> <buffer> q :bwipeout<cr>
 endfunction
 
 function! CVSstatus()
@@ -1093,6 +1094,7 @@ function! CVSlog()
   let s:CVSdontupdatemapping = 1
   call CVSDoCommand('log'.rev)
   call CVSRestoreOpts()
+  silent! nmap <unique> <buffer> q :bwipeout<cr>
 endfunction
 
 function! CVSlog_dir()
