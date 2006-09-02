@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.124 $
-" $Date: 2006/08/20 08:51:37 $
+" $Revision: 1.125 $
+" $Date: 2006/09/02 10:54:00 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -336,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.124 $"
+    \."\n\"CVSmenu $Revision: 1.125 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -1724,7 +1724,7 @@ function! CVSDumpAndClose()
   if g:CVStitlebar
     let cleantitle = substitute(@z,'\t\|\r\|\s\{2,\}',' ','g')
     let cleantitle = substitute(cleantitle,"\n",' ',"g")
-    let &titlestring = '%t%( %M%) (%{expand("%:p:h")}) - '.cleantitle
+    let &titlestring = '%t%( %M%) (%<%{expand("%:p:h")}) - '.cleantitle
     let b:CVSbuftitle = &titlestring
     unlet cleantitle
   endif
