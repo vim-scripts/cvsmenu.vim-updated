@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.125 $
-" $Date: 2006/09/02 10:54:00 $
+" $Revision: 1.126 $
+" $Date: 2006/09/11 14:49:41 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -336,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.125 $"
+    \."\n\"CVSmenu $Revision: 1.126 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -769,6 +769,9 @@ function! CVSDoCommand(cmd,...)
     unlet tmp dummy
   else
     let regbak=@z
+    if has('iconv') && g:CVScvsoutputencoding != ''
+      let filename=iconv(filename, &encoding, g:CVScvsoutputencoding)
+    endif
     if &shell =~? 'cmd\.exe'
       let shellxquotebak=&shellxquote
       let &shellxquote='"'
