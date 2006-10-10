@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.126 $
-" $Date: 2006/09/11 14:49:41 $
+" $Revision: 1.127 $
+" $Date: 2006/10/10 12:01:58 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -336,7 +336,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.126 $"
+    \."\n\"CVSmenu $Revision: 1.127 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -1628,8 +1628,11 @@ function! CVScheckout()
   if rev!=''
     let rev='-r '.rev.' '
   endif
+  let curdir=getcwd()
+  exec 'cd '.destdir
   call CVSDoCommand('checkout '.rev.module)
-  unlet destdir module rev
+  exec 'cd '.curdir
+  unlet curdir destdir module rev
 endfunction
 
 function! CVScheckoutrevision()
