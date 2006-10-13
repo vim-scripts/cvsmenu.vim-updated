@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.127 $
-" $Date: 2006/10/10 12:01:58 $
+" $Revision: 1.132 $
+" $Date: 2006/10/14 06:47:27 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -320,7 +320,6 @@ function! CVSShowInfo(...)
   else
     let tobuf = a:1
   endif
-  "exec 'cd '.expand('%:p:h')
   call CVSChDir(expand('%:p:h'))
   " show CVS info from directory
   let cvsroot='CVS'.s:sep.'Root'
@@ -336,7 +335,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.127 $"
+    \."\n\"CVSmenu $Revision: 1.132 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -745,7 +744,6 @@ function! CVSDoCommand(cmd,...)
   " needs to be called from orgbuffer
   let isfile = CVSUsesFile()
   " change to buffers directory
-  "exec 'cd '.expand('%:p:h')
   call CVSChDir(expand('%:p:h'))
   " get file/directory to work on (if not given)
   if a:0 < 1
@@ -839,7 +837,7 @@ endfunction
 function! CVSUsesFile()
   let filename=expand("%:p:t")
   if    ((g:CVSforcedirectory == 0) && (filename != ''))
-   \ || ((g:CVSforcedirectory > 0) && (filename == ''))
+"   \ || ((g:CVSforcedirectory > 0) && (filename == ''))
     return 1
   else
     return 0
@@ -912,7 +910,6 @@ function! CVSrelease()
     let localtoo=''
   endif
   let releasedir=expand('%:p:h')
-  "exec ':cd ..'
   call CVSChDir(releasedir.s:sep.'..')
   " confirmation prompt -> dont use CVSDoCommand
   if has("unix")
@@ -1628,11 +1625,10 @@ function! CVScheckout()
   if rev!=''
     let rev='-r '.rev.' '
   endif
-  let curdir=getcwd()
-  exec 'cd '.destdir
+  call CVSChDir(destdir)
   call CVSDoCommand('checkout '.rev.module)
-  exec 'cd '.curdir
-  unlet curdir destdir module rev
+  call CVSRestoreDir()
+  unlet destdir module rev
 endfunction
 
 function! CVScheckoutrevision()
@@ -1930,7 +1926,6 @@ function! CVSOpenLinks()
       \ . "call CVSGet('VimTools/cvsmenu.vim',':pserver:anonymous@ezytools.cvs.sourceforge.net:/cvsroot/ezytools','o','')\n\n"
       \ . "\" Get some help on this\n"
       \ . "help CVSFunctions"
-    "exec ':cd '.s:localvim
     call CVSChDir(s:localvim)
     new
     normal "zP
@@ -1965,7 +1960,6 @@ function! CVSLocalStatus()
   " needs to be called from orgbuffer
   let isfile = CVSUsesFile()
   " change to buffers directory
-  "exec 'cd '.expand('%:p:h')
   call CVSChDir(expand('%:p:h'))
   if g:CVSforcedirectory>0
     let filename=expand('%:p:h')
@@ -2088,13 +2082,8 @@ function! CVSGetLocalDirStatus(...)
   else
     let dirname = a:1
   endif
-  "exec 'cd '.dirname
   call CVSChDir(dirname)
-  if has("unix")
-    let @z = glob("*")
-  else
-    let @z = glob("*.*")
-  endif
+  let @z = glob("*")
   new
   silent! exec 'read '.s:CVSentries
   let entrycount = line("$") - 1
