@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.132 $
-" $Date: 2006/10/14 06:47:27 $
+" $Revision: 1.133 $
+" $Date: 2006/10/16 13:01:53 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -335,7 +335,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.132 $"
+    \."\n\"CVSmenu $Revision: 1.133 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -949,6 +949,17 @@ function! CVSdiff(...)
     let rev=CVSInputRev('Revision (optional): ')
   else
     let rev=''
+  endif
+  if rev == ''
+    let filename = expand("%:p:t")
+    if filename != ''
+      let entry = CVSGetEntry(filename)
+      if entry != ''
+	let rev = CVSSubstr(entry,'/',2)
+      endif
+      unlet entry
+    endif
+    unlet filename
   endif
   " tempname() would be deleted before diff (linux)!
   " it is also better to show selected revision
