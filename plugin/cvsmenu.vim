@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.133 $
-" $Date: 2006/10/16 13:01:53 $
+" $Revision: 1.135 $
+" $Date: 2006/10/20 04:12:03 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -335,7 +335,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.133 $"
+    \."\n\"CVSmenu $Revision: 1.135 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -959,6 +959,10 @@ function! CVSdiff(...)
       endif
       unlet entry
     endif
+    if rev == '0'
+      echo 'CVS diff: ' . filename . ' is a new entry!'
+      return
+    endif
     unlet filename
   endif
   " tempname() would be deleted before diff (linux)!
@@ -1084,6 +1088,7 @@ function! CVShistory()
   let s:CVSdontupdatemapping = 1
   call CVSDoCommand('history')
   call CVSRestoreOpts()
+  silent! nmap <unique> <buffer> q :bwipeout<cr>
 endfunction
 
 function! CVSlog()
