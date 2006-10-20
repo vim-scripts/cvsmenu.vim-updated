@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.135 $
-" $Date: 2006/10/20 04:12:03 $
+" $Revision: 1.136 $
+" $Date: 2006/10/21 01:38:24 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -52,6 +52,9 @@ if !exists("g:CVSstatusline")
 endif
 if !exists("g:CVSautocheck")
   let g:CVSautocheck = 1		" do local status on every read/write
+endif
+if !exists("g:CVSeasylogmessage")
+  let g:CVSeasylogmessage = 1		" make editing log message easier
 endif
 if !exists("g:CVSofferrevision")
   let g:CVSofferrevision = 1		" offer current revision on queries
@@ -335,7 +338,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.135 $"
+    \."\n\"CVSmenu $Revision: 1.136 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -352,6 +355,7 @@ function! CVSShowInfo(...)
     \."\nlet g:CVStitlebar\t= "			.g:CVStitlebar			."\t\" Notification on titlebar"
     \."\nlet g:CVSstatusline\t= "		.g:CVSstatusline		."\t\" Notification on statusline"
     \."\nlet g:CVSautocheck\t= "		.g:CVSautocheck			."\t\" Get local status when file is read/written"
+    \."\nlet g:CVSeasylogmessage\t= "		.g:CVSeasylogmessage		."\t\" Ease editing the CVS log message in Vim"
     \."\nlet g:CVSofferrevision\t= "		.g:CVSofferrevision		."\t\" Offer current revision on queries"
     \."\nlet g:CVSsavediff\t= "			.g:CVSsavediff			."\t\" Save settings when using :diff"
     \."\nlet g:CVSdontswitch\t= "		.g:CVSdontswitch		."\t\" Don't switch to diffed file"
@@ -2397,6 +2401,23 @@ function! CVSDiffPrepareLeave()
   endif
 endfunction
 
+" edit CVS log message
+function! CVSCheckLogMsg()
+  if &filetype == 'cvs' && g:CVSeasylogmessage > 0
+    let reg_bak=@"
+    normal ggyy
+    " insert an empty line if the first line begins with 'CVS:'
+    if @" =~ '^CVS:'
+      exec "normal i\<CR>\<C-O>k"
+      set nomodified
+    endif
+    let @"=reg_bak
+    " make <CR> save the log message and quit
+    nmap <buffer> <CR> :x<CR>
+    startinsert
+  endif
+endfunction
+
 "-----------------------------------------------------------------------------
 " finalization		{{{1
 "-----------------------------------------------------------------------------
@@ -2416,6 +2437,8 @@ au BufWritePost * call CVSBufWrite()
 au BufEnter * call CVSBufEnter()
 " restore prediff settings
 au BufWinLeave *.dif call CVSDiffPrepareLeave()
+" insert an empty line and start in insert mode for the CVS log message
+au BufRead cvs\x\+* call CVSCheckLogMsg()
 
 if !exists("loaded_cvsmenu")
   let loaded_cvsmenu=1
