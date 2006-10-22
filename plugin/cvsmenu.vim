@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.136 $
-" $Date: 2006/10/21 01:38:24 $
+" $Revision: 1.140 $
+" $Date: 2006/10/22 09:39:38 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -303,7 +303,7 @@ endfunction
 "-----------------------------------------------------------------------------
 function! CVSEscapeMessage(msg)
   if has('unix')
-    let result = escape(a:msg,'"`\\')
+    let result = escape(a:msg,'"`\')
   else
     let result = escape(a:msg,'"')
     if &shell =~? 'cmd\.exe'
@@ -338,7 +338,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.136 $"
+    \."\n\"CVSmenu $Revision: 1.140 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -820,7 +820,7 @@ function! CVSProcessOutput(isfile,filename,cmd)
   endif
   " move to top
   normal gg
-  set nowrap
+  setlocal nowrap
   " reset single shot flag
   if g:CVSforcedirectory == 1
     let g:CVSforcedirectory = 0
@@ -884,10 +884,31 @@ endfunction
 "-----------------------------------------------------------------------------
 
 function! CVSlogin(...)
-  let pwpipe = ''
-  if a:0 != 0 && has("unix")
-    let pwpipe = 'echo '
-    let pwpipe = pwpipe . a:1 . '|'
+  if a:0 == 0
+    let pwpipe = ''
+  else
+    let pwpipe = 'echo'
+    if !has("unix")
+      if a:1 == ''
+        let pwpipe = pwpipe . '.'
+      endif
+    endif
+    if a:1 != ''
+      if has("unix")
+	" Piping works well because the clean escaping scenario, but I
+	" have not found an environment where CVS actually accepts the
+	" password from the pipe.  I am keeping this just in case it
+	" works somewhere.
+        let pwpipe = pwpipe . ' "' . escape(a:1,'!#%"`\') . '"'
+      else
+	" I failed to find a way to escape strings here for Windows
+	" command lines without requiring a special external program.
+	" So your password may not contain some special symbols like
+	" `&', `|', and `"'.
+        let pwpipe = pwpipe . ' '  . escape(a:1,'!#%')
+      endif
+    endif
+    let pwpipe = pwpipe . '|'
   endif
   if has("unix")
     " show password prompt
@@ -2438,7 +2459,7 @@ au BufEnter * call CVSBufEnter()
 " restore prediff settings
 au BufWinLeave *.dif call CVSDiffPrepareLeave()
 " insert an empty line and start in insert mode for the CVS log message
-au BufRead cvs\x\+* call CVSCheckLogMsg()
+au BufRead cvs*,\d\+ call CVSCheckLogMsg()
 
 if !exists("loaded_cvsmenu")
   let loaded_cvsmenu=1
