@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.140 $
-" $Date: 2006/10/22 09:39:38 $
+" $Revision: 1.142 $
+" $Date: 2007/05/09 14:28:53 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -83,8 +83,11 @@ endif
 if !exists("g:CVSspacesinannotate")
   let g:CVSspacesinannotate = 1		" spaces to add in annotated source
 endif
-if !exists("g:CVScvsoutputencoding")
-  let g:CVScvsoutputencoding = ''	" the encoding of CVS(NT) output
+if !exists("g:CVScmdencoding")
+  let g:CVScmdencoding = ''		" the encoding of CVS(NT) commands
+endif
+if !exists("g:CVSfileencoding")
+  let g:CVSfileencoding = ''		" the encoding of files in CVS
 endif
 if !exists("g:CVSdontconvertfor")
   let g:CVSdontconvertfor = ''		" commands that need no conversion
@@ -338,7 +341,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.140 $"
+    \."\n\"CVSmenu $Revision: 1.142 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -365,7 +368,8 @@ function! CVSShowInfo(...)
     \."\nlet g:CVSfullstatus\t= "		.g:CVSfullstatus		."\t\" Display all fields for fullstatus"
     \."\nlet g:CVSreloadaftercommit = "		.g:CVSreloadaftercommit		."\t\" Reload file to update CVS keywords"
     \."\nlet g:CVSspacesinannotate = "		.g:CVSspacesinannotate		."\t\" Spaces to add in annotated source"
-    \."\nlet g:CVScvsoutputencoding = \'"	.g:CVScvsoutputencoding."\'"	."\t\" The encoding of CVS(NT) output"
+    \."\nlet g:CVScmdencoding = \'"		.g:CVScmdencoding."\'"		."\t\" The encoding of CVS(NT) commands"
+    \."\nlet g:CVSfileencoding = \'"		.g:CVSfileencoding."\'"		."\t\" The encoding of files in CVS"
     \."\nlet g:CVSdontconvertfor = \'"		.g:CVSdontconvertfor."\'"	."\t\" Commands that need no conversion"
     \."\n\"----------------------------------------"
     \."\n\" Change above values to your needs."
@@ -771,8 +775,10 @@ function! CVSDoCommand(cmd,...)
     unlet tmp dummy
   else
     let regbak=@z
-    if has('iconv') && g:CVScvsoutputencoding != ''
-      let filename=iconv(filename, &encoding, g:CVScvsoutputencoding)
+    let cntenc=''
+    if has('iconv') && g:CVScmdencoding != ''
+      let filename=iconv(filename, &encoding, g:CVScmdencoding)
+      let cntenc=g:CVScmdencoding
     endif
     if &shell =~? 'cmd\.exe'
       let shellxquotebak=&shellxquote
@@ -784,15 +790,21 @@ function! CVSDoCommand(cmd,...)
       unlet shellxquotebak
     endif
     let cvscmd=matchstr(a:cmd,'\(^\| \)\zs\w\+\>')
-    if has('iconv')
-	  \&& g:CVScvsoutputencoding != ''
+    if (cvscmd == 'annotate' || cvscmd == 'update')
+	  \&& g:CVSfileencoding != ''
+      let cntenc=g:CVSfileencoding
+    endif
+    if has('iconv') && cntenc != ''
 	  \&& ','.g:CVSdontconvertfor.',' !~ ','.cvscmd.','
-      let @z=iconv(@z, g:CVScvsoutputencoding, &encoding)
+      let @z=iconv(@z, cntenc, &encoding)
     endif
     new
+    if cntenc != ''
+      let &fileencoding=cntenc
+    endif
     silent normal "zP
     let @z=regbak
-    unlet regbak cvscmd
+    unlet regbak cntenc cvscmd
   endif
   call CVSProcessOutput(isfile, filename, a:cmd)
   call CVSRestoreDir()
