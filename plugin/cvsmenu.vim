@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.142 $
-" $Date: 2007/05/09 14:28:53 $
+" $Revision: 1.143 $
+" $Date: 2007/10/01 16:53:19 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -317,6 +317,17 @@ function! CVSEscapeMessage(msg)
 endfunction
 
 "-----------------------------------------------------------------------------
+" change the current directory	{{{1
+"-----------------------------------------------------------------------------
+function! CVSGoDir(dir)
+  if has('unix')
+    exec 'cd '.escape(a:dir,' \')
+  else
+    exec 'cd '.a:dir
+  endif
+endfunction
+
+"-----------------------------------------------------------------------------
 " show cvs info		{{{1
 "-----------------------------------------------------------------------------
 " Param : ToBuffer (bool)
@@ -341,7 +352,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.142 $"
+    \."\n\"CVSmenu $Revision: 1.143 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -513,9 +524,9 @@ endfunction
 
 function! CVSFindFile()
   let curdir = getcwd()
-  exec 'cd '.g:workdir
+  call CVSGoDir(g:workdir)
   normal 0W
-  exec 'cd '.curdir
+  call CVSGoDir(curdir)
   unlet curdir
 endfunction
 
@@ -726,12 +737,12 @@ endfunction
 function! CVSChDir(path)
   let g:orgpath = getcwd()
   let g:workdir = expand("%:p:h")
-  exec 'cd '.a:path
+  call CVSGoDir(a:path)
 endfunction
 
 function! CVSRestoreDir()
   if isdirectory(g:orgpath)
-    exec 'cd '.g:orgpath
+    call CVSGoDir(g:orgpath)
   endif
 endfunction
 
@@ -973,7 +984,7 @@ function! CVSdiff(...)
     call CVSDiffEnter()
   endif
   let orgcwd = getcwd()
-  exec 'cd '.expand('%:p:h')
+  call CVSGoDir(expand('%:p:h'))
   let outputbak = g:CVSdumpandclose
   let autocheckbak = g:CVSautocheck
   let g:CVSautocheck = 0
@@ -1031,7 +1042,7 @@ function! CVSdiff(...)
     redraw
     wincmd 
   endif
-  exec 'cd '.orgcwd
+  call CVSGoDir(orgcwd)
   let g:CVSdumpandclose = outputbak
   let g:CVSautocheck = autocheckbak
   unlet outputbak autocheckbak
