@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.145 $
-" $Date: 2007/12/30 06:40:43 $
+" $Revision: 1.147 $
+" $Date: 2008/06/29 09:41:46 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -352,7 +352,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.145 $"
+    \."\n\"CVSmenu $Revision: 1.147 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -787,7 +787,9 @@ function! CVSDoCommand(cmd,...)
   else
     let regbak=@z
     let cntenc=''
+    let cmd=a:cmd
     if has('iconv') && g:CVScmdencoding != ''
+      let cmd=iconv(cmd, &encoding, g:CVScmdencoding)
       let filename=iconv(filename, &encoding, g:CVScmdencoding)
       let cntenc=g:CVScmdencoding
     endif
@@ -795,7 +797,7 @@ function! CVSDoCommand(cmd,...)
       let shellxquotebak=&shellxquote
       let &shellxquote='"'
     endif
-    let @z=system($CVSCMD.' '.$CVSOPT.' '.a:cmd.' '.$CVSCMDOPT.' '.filename)
+    let @z=system($CVSCMD.' '.$CVSOPT.' '.cmd.' '.$CVSCMDOPT.' '.filename)
     if &shell =~? 'cmd\.exe'
       let &shellxquote=shellxquotebak
       unlet shellxquotebak
@@ -811,11 +813,11 @@ function! CVSDoCommand(cmd,...)
     endif
     new
     if cntenc != ''
-      let &fileencoding=cntenc
+      exec 'setlocal fileencoding=' . cntenc
     endif
     silent normal "zP
     let @z=regbak
-    unlet regbak cntenc cvscmd
+    unlet regbak cntenc cmd cvscmd
   endif
   call CVSProcessOutput(isfile, filename, a:cmd)
   call CVSRestoreDir()
