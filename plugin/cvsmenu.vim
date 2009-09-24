@@ -1,8 +1,8 @@
 " CVSmenu.vim : Vim menu for using CVS			vim:tw=0:sw=2:ts=8
 " Author : Thorsten Maerz <info@netztorte.de>		vim600:fdm=marker
 " Maintainer : Wu Yongwei <wuyongwei@gmail.com>
-" $Revision: 1.147 $
-" $Date: 2008/06/29 09:41:46 $
+" $Revision: 1.150 $
+" $Date: 2009/09/24 03:24:44 $
 " License : LGPL
 "
 " Tested with Vim 6.0
@@ -352,7 +352,7 @@ function! CVSShowInfo(...)
   new
   let zbak=@z
   let @z = ''
-    \."\n\"CVSmenu $Revision: 1.147 $"
+    \."\n\"CVSmenu $Revision: 1.150 $"
     \."\n\"Current directory : ".expand('%:p:h')
     \."\n\"Current Root : ".root
     \."\n\"Current Repository : ".repository
@@ -539,7 +539,7 @@ function! CVSMoveToTop(searchstr)
   silent exec 'g/'.a:searchstr.'/m0'
 endfunction
 
-" only called by CVSShortStatus
+" only called by CVSshortstatus
 function! CVSSortStatusOutput()
   " allow changes
   call CVSMakeRW()
@@ -812,9 +812,6 @@ function! CVSDoCommand(cmd,...)
       let @z=iconv(@z, cntenc, &encoding)
     endif
     new
-    if cntenc != ''
-      exec 'setlocal fileencoding=' . cntenc
-    endif
     silent normal "zP
     let @z=regbak
     unlet regbak cntenc cmd cvscmd
@@ -1723,7 +1720,7 @@ function! CVSrevertchanges()
     return
   endif
   call CVSSaveOpts()
-  let $CVSCMDOPT='-A '
+  "let $CVSCMDOPT='-A '
   call CVSupdate()
   call CVSRestoreOpts()
   call CVSRestoreDir()
@@ -1799,7 +1796,7 @@ function! CVSDumpAndClose()
   let @z=regbak
 endfunction
 
-" leave only leading line with status info (for CVSShortStatus)
+" leave only leading line with status info (for CVSshortstatus)
 function! CVSCompressStatus()
   exec 'g!/^File:\|?/d'
 endfunction
